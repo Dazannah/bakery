@@ -6,6 +6,9 @@ class Ingredient {
 
   public function __construct($name, $id = null) {
     $this->name = $name;
+
+    if ($id)
+      $this->id = $id;
   }
 
   public function getCreateSql() {
