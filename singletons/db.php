@@ -22,7 +22,7 @@ class Database {
     }
   }
 
-  private function __destruct() {
+  public function __destruct() {
     $this->connection->close();
   }
 
@@ -33,6 +33,6 @@ class Database {
     if (!isset(self::$instance))
       self::$instance = new static();
 
-    return self::$instance;
+    return self::$instance->connection;
   }
 }
