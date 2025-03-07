@@ -1,7 +1,6 @@
 <?php
 
 class Ingredients {
+  public int $id;
   public string $name;
-  public int $amount;
-  public string $unit;
 }
