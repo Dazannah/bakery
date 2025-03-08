@@ -21,8 +21,9 @@ fetch("/last-week-profit")
     }
   })
   .then(data => {
-    const lastWeekIncome = document.getElementById("last-week-profit");
-    lastWeekIncome.innerText = data;
+    console.log(data);
+    const lastWeekProfit = document.getElementById("last-week-profit");
+    lastWeekProfit.innerText = data;
   })
   .catch(error => console.log(error));
 
