@@ -29,7 +29,7 @@ CREATE TABLE `Ingredients` (
   `name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `Name_UNIQUE` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1116 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,11 +42,12 @@ DROP TABLE IF EXISTS `Recipes`;
 CREATE TABLE `Recipes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
-  `lactoseFree` tinyint NOT NULL,
-  `glutenFree` tinyint NOT NULL,
+  `price` int NOT NULL,
+  `lactoseFree` tinyint(1) NOT NULL DEFAULT '0',
+  `glutenFree` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `Name_UNIQUE` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=893 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -78,10 +79,8 @@ DROP TABLE IF EXISTS `SalesOfLastWeek`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `SalesOfLastWeek` (
-  `id` int NOT NULL,
   `recipeId` int NOT NULL,
   `amount` int DEFAULT NULL,
-  PRIMARY KEY (`id`),
   UNIQUE KEY `recipeId_UNIQUE` (`recipeId`),
   KEY `recipeId_idx` (`recipeId`),
   CONSTRAINT `recipeIdFK` FOREIGN KEY (`recipeId`) REFERENCES `Recipes` (`id`)
@@ -100,7 +99,7 @@ CREATE TABLE `Units` (
   `name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `Name_UNIQUE` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -111,16 +110,17 @@ DROP TABLE IF EXISTS `WholesalePrice`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `WholesalePrice` (
-  `id` int NOT NULL,
-  `name` varchar(45) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ingredientId` int NOT NULL,
   `amount` int NOT NULL,
   `unitId` int NOT NULL,
   `price` int NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name_UNIQUE` (`name`),
+  UNIQUE KEY `name_UNIQUE` (`ingredientId`),
   KEY `unitId_idx` (`unitId`),
+  CONSTRAINT `ingredientIdFK` FOREIGN KEY (`ingredientId`) REFERENCES `Ingredients` (`id`),
   CONSTRAINT `unitIdFK` FOREIGN KEY (`unitId`) REFERENCES `Units` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -132,4 +132,4 @@ CREATE TABLE `WholesalePrice` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-07 21:01:50
+-- Dump completed on 2025-03-08  8:54:30
