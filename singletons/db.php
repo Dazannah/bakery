@@ -15,10 +15,14 @@ class Database {
     $database = $config->database->database;
     $port = $config->database->port;
 
-    $this->connection = new mysqli($servername, $username, $password, $database, $port);
+    try {
+      $this->connection = new mysqli($servername, $username, $password, $database, $port);
 
-    if ($this->connection->connect_error) {
-      die("Connection failed: " . $this->connection->connect_error);
+      if ($this->connection->connect_error) {
+        die("Connection failed: " . $this->connection->connect_error);
+      }
+    } catch (Exception $ex) {
+      die("SQL Error: " . $ex->getMessage());
     }
   }
 
