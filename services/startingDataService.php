@@ -89,6 +89,9 @@ class StartingDataService {
 
     //save salesOfLastWeek into database
     foreach ($data->salesOfLastWeek as $sale) {
+      if (!isset($recipes[$sale->name]))
+        continue;
+
       $recipeId = $recipes[$sale->name]->id;
       $newSale = new Sale($recipeId, $sale->amount);
       $sql = $newSale->getCreateSql();
@@ -104,6 +107,9 @@ class StartingDataService {
     //save wholesalePrices into database
     foreach ($data->wholesalePrices as $wholesalePrice) {
       $explodedUnit = explode(" ", $wholesalePrice->amount);
+      if (!isset($ingredients[$wholesalePrice->name]) || !isset($units[$explodedUnit[1]]))
+        continue;
+
       $newWholesalePrice = new WholesalePrice($ingredients[$wholesalePrice->name]->id, $explodedUnit[0], $units[$explodedUnit[1]]->id, $wholesalePrice->price);
       $sql = $newWholesalePrice->getCreateSql();
 
