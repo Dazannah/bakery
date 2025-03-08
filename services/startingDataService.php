@@ -5,6 +5,7 @@ require_once "./models/Unit.php";
 require_once "./models/Recipe.php";
 require_once "./models/RecipeIngredient.php";
 require_once "./models/Sale.php";
+require_once "./models/WholesalePrice.php";
 
 class StartingDataService {
   public static function addProvidedData() {
@@ -86,6 +87,20 @@ class StartingDataService {
       $recipeId = $recipes[$sale->name]->id;
       $newSale = new Sale($recipeId, $sale->amount);
       $sql = $newSale->getCreateSql();
+
+      try {
+        $db->query($sql);
+      } catch (Exception $ex) {
+        if (!preg_match($duplicateRegexp, $ex->getMessage()))
+          echo $ex->getMessage() . "<br/>";
+      }
+    }
+
+    // { "name": "flour", "amount": "10 kg", "price": 1500 },
+    foreach ($data->wholesalePrices as $wholesalePrice) {
+      $explodedUnit = explode(" ", $wholesalePrice->amount);
+      $newWholesalePrice = new WholesalePrice($ingredients[$wholesalePrice->name]->id, $explodedUnit[0], $units[$explodedUnit[1]]->id, $wholesalePrice->price);
+      $sql = $newWholesalePrice->getCreateSql();
 
       try {
         $db->query($sql);
