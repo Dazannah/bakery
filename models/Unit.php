@@ -1,17 +1,17 @@
 <?php
+require_once "./interfaces/IModel.php";
 
-class Unit {
-  public int $id;
+
+class Unit implements IModel {
+  public int|null $id;
   public string $name;
 
   public function __construct(string $name, int|null $id = null) {
+    $this->id = $id;
     $this->name = $name;
-
-    if ($id)
-      $this->id = $id;
   }
 
-  public function getCreateSql() {
+  public function getCreateSql(): string {
     return "INSERT INTO Units(name) VALUES('$this->name')";
   }
 }
