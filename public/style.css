@@ -1,0 +1,48 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#main-wrapper {
+  max-width: 80%;
+  max-height: fit-content;
+  padding-top: 1%;
+  margin: auto;
+}
+
+.card {
+  max-width: fit-content;
+  max-height: fit-content;
+  margin: 5px;
+  padding: 5px;
+  border: 1px black solid;
+}
+
+#cards-wrapper {
+  display: grid;
+  grid-template-columns: auto auto;
+  max-width: fit-content;
+}
+
+#gluten-and-lactose-free-wrapper {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+table {
+  border: 1px black solid;
+}
+
+th,
+tr,
+td {
+  border: 1px black solid;
+  padding: 5px;
+}
+
+#max-preperable {
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
