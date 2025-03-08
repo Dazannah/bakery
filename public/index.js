@@ -9,4 +9,5 @@ fetch("/last-week-income")
   .then(data => {
     const lastWeekIncome = document.getElementById("last-week-income");
     lastWeekIncome.innerText = data;
-  });
+  })
+  .catch(error => console.log(error));
