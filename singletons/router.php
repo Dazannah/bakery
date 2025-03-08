@@ -3,6 +3,7 @@
 class Router {
   private static $instance;
   private $routes = [];
+  private static $catchAllRoute = "/";
 
   private function __construct() {
   }
@@ -17,9 +18,9 @@ class Router {
     return self::$instance;
   }
 
-  public function addRoute($route, $callback) {
-    if (isset($route) && isset($callback)) {
-      $this->routes[$route] = $callback;
+  public function addRoute($route, $classAndFuncName) {
+    if (isset($route) && isset($classAndFuncName)) {
+      $this->routes[$route] = $classAndFuncName;
     } else {
       throw new Exception("Provide route and callback funcion");
     }
@@ -28,11 +29,13 @@ class Router {
   public function use() {
     if (isset($_SERVER["PATH_INFO"])) {
       if (isset($this->routes[$_SERVER["PATH_INFO"]])) {
-        $this->routes[$_SERVER["PATH_INFO"]]();
+        $object = new $this->routes[$_SERVER["PATH_INFO"]][0];
+        $object->{$this->routes[$_SERVER["PATH_INFO"]][1]}();
+
         exit();
       }
 
-      header('Location: /');
+      header('Location: ' . $this->catchAllRoute);
       exit();
     }
 
@@ -41,5 +44,9 @@ class Router {
     fclose($indexHtml);
 
     exit();
+  }
+
+  public static function setCatchAllRoute(string $route) {
+    self::$catchAllRoute = $route;
   }
 }
