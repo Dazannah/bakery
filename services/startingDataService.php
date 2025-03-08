@@ -18,6 +18,7 @@ class StartingDataService {
     $duplicateRegexp = "/duplicate/i";
 
     $ingredients = [];
+    //save ingredients into database
     foreach ($data->inventory as $inventory) {
       $ingredient = new Ingredient($inventory->name);
       $sql = $ingredient->getCreateSql();
@@ -37,6 +38,7 @@ class StartingDataService {
     $unitsJson = json_decode(fread($unitsFile, filesize($unitsLocation)));
 
     $units = [];
+    //save units into database
     foreach ($unitsJson as $unit) {
       $unit = new Unit($unit);
       $sql = $unit->getCreateSql();
@@ -53,6 +55,7 @@ class StartingDataService {
     }
 
     $recipes = [];
+    //save recipes into database
     foreach ($data->recipes as $recipe) {
       $newRecipe = new Recipe($recipe->name, $recipe->price, $recipe->lactoseFree, $recipe->glutenFree);
       $sql = $newRecipe->getCreateSql();
@@ -63,6 +66,7 @@ class StartingDataService {
         $newRecipe->id = $db->insert_id;
         $recipes[$newRecipe->name] = $newRecipe;
 
+        //save recipeIngredients into database
         foreach ($recipe->ingredients as $ingredient) {
           $explodedUnit = explode(" ", $ingredient->amount);
           $newRecipeIngredient = new RecipeIngredient($newRecipe->id, $ingredients[$ingredient->name]->id, $explodedUnit[0], $units[$explodedUnit[1]]->id);
@@ -83,6 +87,7 @@ class StartingDataService {
       }
     }
 
+    //save salesOfLastWeek into database
     foreach ($data->salesOfLastWeek as $sale) {
       $recipeId = $recipes[$sale->name]->id;
       $newSale = new Sale($recipeId, $sale->amount);
@@ -96,7 +101,7 @@ class StartingDataService {
       }
     }
 
-    // { "name": "flour", "amount": "10 kg", "price": 1500 },
+    //save wholesalePrices into database
     foreach ($data->wholesalePrices as $wholesalePrice) {
       $explodedUnit = explode(" ", $wholesalePrice->amount);
       $newWholesalePrice = new WholesalePrice($ingredients[$wholesalePrice->name]->id, $explodedUnit[0], $units[$explodedUnit[1]]->id, $wholesalePrice->price);
