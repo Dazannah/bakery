@@ -4,6 +4,7 @@ require_once "./models/Ingredient.php";
 require_once "./models/Unit.php";
 require_once "./models/Recipe.php";
 require_once "./models/RecipeIngredient.php";
+require_once "./models/Sale.php";
 
 class StartingDataService {
   public static function addProvidedData() {
@@ -75,6 +76,19 @@ class StartingDataService {
         }
 
         $db->insert_id;
+      } catch (Exception $ex) {
+        if (!preg_match($duplicateRegexp, $ex->getMessage()))
+          echo $ex->getMessage() . "<br/>";
+      }
+    }
+
+    foreach ($data->salesOfLastWeek as $sale) {
+      $recipeId = $recipes[$sale->name]->id;
+      $newSale = new Sale($recipeId, $sale->amount);
+      $sql = $newSale->getCreateSql();
+
+      try {
+        $db->query($sql);
       } catch (Exception $ex) {
         if (!preg_match($duplicateRegexp, $ex->getMessage()))
           echo $ex->getMessage() . "<br/>";
