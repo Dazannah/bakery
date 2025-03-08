@@ -35,7 +35,7 @@ class Router {
         exit();
       }
 
-      header('Location: ' . $this->catchAllRoute);
+      header('Location: ' . self::$catchAllRoute);
       exit();
     }
 
