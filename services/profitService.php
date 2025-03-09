@@ -23,7 +23,7 @@ class ProfitService implements IProfitService {
 
     $query = "SELECT * FROM SalesOfLastWeek;";
 
-    /** @var array<int|float, int|float> */
+    /** @var array<int, int> */
     $salesOfLastWeek = $this->db->query($query)->fetch_all();
 
     $recipeIds = [];
@@ -36,16 +36,17 @@ class ProfitService implements IProfitService {
 
     $lastWeekIngredientsCost = 0;
     foreach ($salesOfLastWeek as $sale) {
+
       $ingredientCost = 0;
       foreach ($recipes[$sale[0]]->ingredients as $ingredient) {
-        $ingredientCost += $sale[1] * $basePrices[$ingredient->name] * $ingredient->amount;
+        $ingredientCost += $basePrices[$ingredient->name] * $ingredient->amount;
       }
 
-      $lastWeekIngredientsCost += $ingredientCost;
+      $lastWeekIngredientsCost += $ingredientCost * $sale[1];
     }
 
     $result = $lastweekIncome - $lastWeekIngredientsCost;
 
-    return $result;
+    return $result; // minusz a végeredmény ellenőrizni
   }
 }
