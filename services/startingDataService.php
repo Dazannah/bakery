@@ -57,7 +57,7 @@ class StartingDataService {
     $recipes = [];
     //save recipes into database
     foreach ($data->recipes as $recipe) {
-      $newRecipe = new Recipe($recipe->name, $recipe->price, $recipe->lactoseFree, $recipe->glutenFree);
+      $newRecipe = new Recipe($recipe->name, explode(" ", $recipe->price)[0], $recipe->lactoseFree, $recipe->glutenFree);
       $sql = $newRecipe->getCreateSql();
 
 
