@@ -1,11 +1,13 @@
 <?php
-require_once "./interfaces/IRecipeService.php";
+require_once "./interfaces/IIngredientService.php";
 
 class RecipeService implements IRecipeService {
   private mysqli $db;
+  private IIngredientService $ingredientService;
 
-  public function __construct(mysqli $db) {
+  public function __construct(mysqli $db, IIngredientService $ingredientService) {
     $this->db = $db;
+    $this->ingredientService = $ingredientService;
   }
 
   public function getFreeColumn(): array {
@@ -45,17 +47,7 @@ class RecipeService implements IRecipeService {
 
     $recipes = [];
     foreach ($rawRecipes as $rawRecipe) {
-      $query = "SELECT Ingredients.id as id, Ingredients.name as name, RecipesIngredients.amount as amount, Units.name as unitName FROM RecipesIngredients
-      INNER JOIN Ingredients ON RecipesIngredients.ingredientId = Ingredients.id
-      INNER JOIN Units ON RecipesIngredients.unitId = Units.id
-      WHERE RecipesIngredients.recipeId = '$rawRecipe[0]'";
-      $rawIngredientsResult = $this->db->query($query);
-
-      $ingredients = [];
-
-      while ($row = $rawIngredientsResult->fetch_assoc()) {
-        array_push($ingredients, new IngredientDTO($row["id"], $row["name"], $row["amount"], $row["unitName"]));
-      }
+      $ingredients = $this->ingredientService->getIngredientsByRecipeId($rawRecipe[0]);
 
       $recipes[$rawRecipe[0]] = new RecipeDTO($rawRecipe[1], $rawRecipe[2], $rawRecipe[3], $rawRecipe[4], $rawRecipe[0], $ingredients);
     }
