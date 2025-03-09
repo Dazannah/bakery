@@ -1,54 +1,51 @@
 <?php
 require_once "./interfaces/IProfitService.php";
+require_once "./interfaces/IWholesalePriceService.php";
+require_once "./interfaces/IRecipeService.php";
+require_once "./dtos/RecipeDTO.php";
+require_once "./dtos/IngredientDTO.php";
 
 class ProfitService implements IProfitService {
   private mysqli $db;
   private IIncomeService $incomeService;
+  private IWholesalePriceService $wholesalePriceService;
+  private IRecipeService $recipeService;
 
-  public function __construct(mysqli $db, IIncomeService $incomeService) {
+  public function __construct(mysqli $db, IIncomeService $incomeService, IWholesalePriceService $wholesalePriceService, RecipeService $recipeService) {
     $this->db = $db;
     $this->incomeService = $incomeService;
+    $this->wholesalePriceService = $wholesalePriceService;
+    $this->recipeService = $recipeService;
   }
 
-  public function getLastWeekProfit(): array {
+  public function getLastWeekProfit(): int|float {
     $lastweekIncome = $this->incomeService->getLastWeekIncome();
 
     $query = "SELECT * FROM SalesOfLastWeek;";
+
+    /** @var array<int|float, int|float> */
     $salesOfLastWeek = $this->db->query($query)->fetch_all();
 
-    $idsString = "";
-    foreach ($salesOfLastWeek as $key => $sale) {
-      $idsString .= "$sale[0]";
-      if ($key < count($salesOfLastWeek) - 1)
-        $idsString .= ",";
+    $recipeIds = [];
+    foreach ($salesOfLastWeek as $sale) {
+      array_push($recipeIds, $sale[0]);
     }
 
-    $query = "SELECT * FROM Recipes WHERE id in ($idsString);";
-    $rawRecipes = $this->db->query($query)->fetch_all();
+    $recipes = $this->recipeService->getRecipesByIds($recipeIds);
+    $basePrices = $this->wholesalePriceService->getBasePrices();
 
-    $recipes = [];
-    foreach ($rawRecipes as $rawRecipe) {
-      $query = "SELECT Ingredients.name as name, RecipesIngredients.amount as amount, Units.name as unitName FROM RecipesIngredients
-      INNER JOIN Ingredients ON RecipesIngredients.ingredientId = Ingredients.id
-      INNER JOIN Units ON RecipesIngredients.unitId = Units.id
-      WHERE RecipesIngredients.recipeId = '$rawRecipe[0]'";
-      $rawRecipesResult = $this->db->query($query);
-
-      $ingredients = [];
-
-      while ($row = $rawRecipesResult->fetch_assoc()) {
-        array_push($ingredients, $row);
+    $lastWeekIngredientsCost = 0;
+    foreach ($salesOfLastWeek as $sale) {
+      $ingredientCost = 0;
+      foreach ($recipes[$sale[0]]->ingredients as $ingredient) {
+        $ingredientCost += $sale[1] * $basePrices[$ingredient->name] * $ingredient->amount;
       }
 
-      $recipes[$rawRecipe[0]] = new Recipe($rawRecipe[1], $rawRecipe[2], $rawRecipe[3], $rawRecipe[4], $rawRecipe[0]);
-      $recipes[$rawRecipe[0]]->ingredients = $ingredients; // modelel meg csinálni!!
+      $lastWeekIngredientsCost += $ingredientCost;
     }
-    //recepteket lekérni, és össze számolni az alapanyagokat
 
-    // bevétel-alapanyag_költség
+    $result = $lastweekIncome - $lastWeekIngredientsCost;
 
-    $result = $salesOfLastWeek;
-
-    return $recipes;
+    return $result;
   }
 }
