@@ -20,6 +20,7 @@ class RecipeService implements IRecipeService {
     return ["lactoseFree" => $lactoseFreeResult->fetch_all(), "glutenFree" => $glutenFreeResult->fetch_all(), "glutenAndLactoseFree" => $lactoseAndGlutenFreeResult->fetch_all()];
   }
 
+  /** @return  RecipeDTO[] */
   public function getRecipesByIds(array $ids): array {
     $idsString = "";
     foreach ($ids as $key => $id) {
@@ -27,8 +28,19 @@ class RecipeService implements IRecipeService {
       if ($key < count($ids) - 1)
         $idsString .= ",";
     }
+    $where = "WHERE id in ($idsString)";
 
-    $query = "SELECT * FROM Recipes WHERE id in ($idsString);";
+    return $this->getRecipesBase($where);
+  }
+
+  /** @return  RecipeDTO[] */
+  public function getAllRecipes(): array {
+    return $this->getRecipesBase();
+  }
+
+  /** @return  RecipeDTO[] */
+  private function getRecipesBase(string $where = ""): array {
+    $query = "SELECT * FROM Recipes $where;";
     $rawRecipes = $this->db->query($query)->fetch_all();
 
     $recipes = [];
