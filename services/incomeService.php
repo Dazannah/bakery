@@ -9,9 +9,10 @@ class IncomeService implements IIncomeService {
   }
 
   public function getLastWeekIncome(): int {
-    $query = "SELECT sum(amount) as lastWeekIncome FROM SalesOfLastWeek;";
-    $result = $this->db->query($query);
+    $query = "SELECT sum(SalesOfLastWeek.amount * Recipes.price) as lastWeekIncome FROM SalesOfLastWeek
+    INNER JOIN Recipes on Recipes.id = SalesOfLastWeek.recipeId;";
+    $queryResult = $this->db->query($query);
 
-    return $result->fetch_assoc()['lastWeekIncome'];
+    return $queryResult->fetch_assoc()["lastWeekIncome"];
   }
 }
