@@ -1,7 +1,7 @@
 <?php
 require_once "./singletons/db.php";
 require_once "./services/profitService.php";
-require_once "./services/profitService.php";
+require_once "./services/ingredientService.php";
 require_once "./services/wholesalePriceService.php";
 
 class ProfitController {
@@ -12,7 +12,7 @@ class ProfitController {
       Database::getInstance(),
       new IncomeService(Database::getInstance()),
       new WholesalePriceService(Database::getInstance()),
-      new RecipeService(Database::getInstance())
+      new RecipeService(Database::getInstance(), new IngredientService(Database::getInstance()))
     );
   }
 
