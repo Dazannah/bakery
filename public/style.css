@@ -24,9 +24,9 @@ body {
   max-width: fit-content;
 }
 
-#gluten-and-lactose-free-wrapper {
+#wrapper {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: 1fr 1fr 1fr;
   margin-top: 25px;
   margin-bottom: 25px;
 }
