@@ -9,29 +9,9 @@ require_once "./models/WholesalePrice.php";
 
 class StartingDataService {
   public static function addProvidedData() {
-    $dataLocation = "data.json";
-    $dataFile = fopen($dataLocation, "r") or die("Unable to open config file!");
-    $data = json_decode(fread($dataFile, filesize($dataLocation)));
-
     $db = Database::getInstance();
 
     $duplicateRegexp = "/duplicate/i";
-
-    $ingredients = [];
-    //save ingredients into database
-    foreach ($data->inventory as $inventory) {
-      $ingredient = new Ingredient($inventory->name);
-      $sql = $ingredient->getCreateSql();
-
-      try {
-        $db->query($sql);
-        $ingredient->id = $db->insert_id;
-        $ingredients[$ingredient->name] = $ingredient;
-      } catch (Exception $ex) {
-        if (!preg_match($duplicateRegexp, $ex->getMessage()))
-          echo $ex->getMessage() . "<br/>";
-      }
-    }
 
     $unitsLocation = "units.json";
     $unitsFile = fopen($unitsLocation, "r") or die("Unable to open units file!");
@@ -53,6 +33,38 @@ class StartingDataService {
           echo $ex->getMessage() . "<br/>";
       }
     }
+
+    $dataLocation = "data.json";
+    $dataFile = fopen($dataLocation, "r") or die("Unable to open config file!");
+    $data = json_decode(fread($dataFile, filesize($dataLocation)));
+
+    $ingredients = [];
+    //save ingredients into database
+    foreach ($data->inventory as $inventory) {
+      $explodedAmount = explode(" ", $inventory->amount);
+
+      if (!isset($units[$explodedAmount[1]]))
+        continue;
+      if ($explodedAmount[1] == "kg" || $explodedAmount[1] == "l") {
+        $explodedAmount[0] *= 1000;
+        $explodedAmount[1] = $explodedAmount[1] == "kg" ? "g" : "ml";
+      }
+
+      $ingredient = new Ingredient($inventory->name, $explodedAmount[0], $units[$explodedAmount[1]]->id);
+      $sql = $ingredient->getCreateSql();
+
+      try {
+        $db->query($sql);
+        $ingredient->id = $db->insert_id;
+
+        $ingredients[$ingredient->name] = $ingredient;
+      } catch (Exception $ex) {
+        if (!preg_match($duplicateRegexp, $ex->getMessage()))
+          echo $ex->getMessage() . "<br/>";
+      }
+    }
+
+
 
     $recipes = [];
     //save recipes into database
