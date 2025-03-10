@@ -4,20 +4,29 @@ require_once "./dtos/IngredientDTO.php";
 
 class InventoryService implements IInventoryService {
   private IRecipeService $recipeService;
-  private mysqli $db;
 
-  public function __construct(mysqli $db, IRecipeService $recipeService) {
-    $this->db = $db;
+  public function __construct(IRecipeService $recipeService) {
     $this->recipeService = $recipeService;
   }
 
-  public function getInventory(): array {
-    $query = "SELECT * FROM ";
-  }
-
-  public function getMaxProducableFromInventory() {
+  public function getMaxProducableFromInventory(): array {
     $allRecipes = $this->recipeService->getAllRecipes();
 
-    return $allRecipes;
+    $result = [];
+
+    foreach ($allRecipes as $recipe) {
+      $smallest = PHP_INT_MAX;
+      foreach ($recipe->ingredients as $ingredient) {
+        $num = floor($ingredient->inventory / $ingredient->amount);
+
+        if ($num < $smallest)
+          $smallest = $num;
+      }
+
+      array_push($result, array($recipe->name, $smallest));
+    }
+
+
+    return $result;
   }
 }
