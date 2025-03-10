@@ -54,7 +54,6 @@ fetch("/max-producable")
     }
   })
   .then(data => {
-    console.log(data);
     const maxProducable = document.getElementById("max-producable").getElementsByTagName("tbody")[0];
 
     maxProducable.innerHTML = generateTbody(data, "db");
