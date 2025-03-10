@@ -10,7 +10,7 @@ class IngredientService implements IIngredientService {
   }
 
   public function getIngredientsByRecipeId(int $recipeId): array {
-    $query = "SELECT Ingredients.id as id, Ingredients.name as name, RecipesIngredients.amount as amount, Units.name as unitName FROM RecipesIngredients
+    $query = "SELECT Ingredients.id as id, Ingredients.name as name, Ingredients.inventory as inventory, RecipesIngredients.amount as amount, Units.name as unitName FROM RecipesIngredients
     INNER JOIN Ingredients ON RecipesIngredients.ingredientId = Ingredients.id
     INNER JOIN Units ON RecipesIngredients.unitId = Units.id
     WHERE RecipesIngredients.recipeId = '$recipeId'";
@@ -19,7 +19,7 @@ class IngredientService implements IIngredientService {
     $ingredients = [];
 
     while ($row = $rawIngredientsResult->fetch_assoc()) {
-      array_push($ingredients, new IngredientDTO($row["id"], $row["name"], $row["amount"], $row["unitName"]));
+      array_push($ingredients, new IngredientDTO($row["id"], $row["name"], $row["amount"], $row["unitName"], $row["inventory"]));
     }
 
     return $ingredients;
