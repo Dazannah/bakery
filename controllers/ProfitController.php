@@ -12,7 +12,7 @@ class ProfitController {
       Database::getInstance(),
       new IncomeService(Database::getInstance()),
       new WholesalePriceService(Database::getInstance()),
-      new RecipeService(Database::getInstance(), new IngredientService(Database::getInstance()))
+      new RecipeService(Database::getInstance(), new IngredientService(Database::getInstance()), new WholesalePriceService(Database::getInstance()))
     );
   }
 
