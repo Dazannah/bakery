@@ -8,117 +8,124 @@ require_once "./models/Sale.php";
 require_once "./models/WholesalePrice.php";
 
 class StartingDataService {
+  public static $duplicateRegexp = "/duplicate/i";
+  public static $data;
+  public static $units = [];
+  public static $ingredients = [];
+  public static $recipes = [];
+
   public static function addProvidedData() {
-    $db = Database::getInstance();
+    self::saveUnits();
 
-    $duplicateRegexp = "/duplicate/i";
+    $dataLocation = "data.json";
+    $dataFile = fopen($dataLocation, "r") or die("Unable to open config file!");
+    self::$data = json_decode(fread($dataFile, filesize($dataLocation)));
 
+    self::saveIngredients();
+    self::saveRecipes();
+    self::saveSalesOfLastWeek();
+    self::saveWholeSalePrices();
+  }
+
+  public static function saveUnits() {
     $unitsLocation = "units.json";
     $unitsFile = fopen($unitsLocation, "r") or die("Unable to open units file!");
     $unitsJson = json_decode(fread($unitsFile, filesize($unitsLocation)));
 
-    $units = [];
-    //save units into database
     foreach ($unitsJson as $unit) {
-      $unit = new Unit($unit);
-
       try {
+        $unit = new Unit($unit);
         $unit->create();
 
-        $units[$unit->name] = $unit;
+        self::$units[$unit->name] = $unit;
       } catch (Exception $ex) {
-        if (!preg_match($duplicateRegexp, $ex->getMessage()))
+        if (!preg_match(self::$duplicateRegexp, $ex->getMessage()))
           echo $ex->getMessage() . "<br/>";
       }
     }
+  }
 
-    $dataLocation = "data.json";
-    $dataFile = fopen($dataLocation, "r") or die("Unable to open config file!");
-    $data = json_decode(fread($dataFile, filesize($dataLocation)));
-
-    $ingredients = [];
-    //save ingredients into database
-    foreach ($data->inventory as $inventory) {
+  public static function saveIngredients() {
+    foreach (self::$data->inventory as $inventory) {
       $explodedAmount = explode(" ", $inventory->amount);
 
-      if (!isset($units[$explodedAmount[1]]))
+      if (!isset(self::$units[$explodedAmount[1]]))
         continue;
+
       if ($explodedAmount[1] == "kg" || $explodedAmount[1] == "l") {
         $explodedAmount[0] *= 1000;
         $explodedAmount[1] = $explodedAmount[1] == "kg" ? "g" : "ml";
       }
 
-      $ingredient = new Ingredient($inventory->name, $explodedAmount[0], $units[$explodedAmount[1]]->id);
-
       try {
+        $ingredient = new Ingredient($inventory->name, $explodedAmount[0], self::$units[$explodedAmount[1]]->id);
         $ingredient->create();
 
-        $ingredients[$ingredient->name] = $ingredient;
+        self::$ingredients[$ingredient->name] = $ingredient;
       } catch (Exception $ex) {
-        if (!preg_match($duplicateRegexp, $ex->getMessage()))
+        if (!preg_match(self::$duplicateRegexp, $ex->getMessage()))
           echo $ex->getMessage() . "<br/>";
       }
     }
+  }
 
+  public static function saveRecipes() {
+    foreach (self::$data->recipes as $recipe) {
+      try {
+        $newRecipe = new Recipe($recipe->name, explode(" ", $recipe->price)[0], $recipe->lactoseFree, $recipe->glutenFree);
+        $newRecipe->create();
 
+        self::$recipes[$newRecipe->name] = $newRecipe;
 
-    $recipes = [];
-    //save recipes into database
-    foreach ($data->recipes as $recipe) {
-      $newRecipe = new Recipe($recipe->name, explode(" ", $recipe->price)[0], $recipe->lactoseFree, $recipe->glutenFree);
+        self::saveRecipeIngredients($recipe, $newRecipe->id);
+      } catch (Exception $ex) {
+        if (!preg_match(self::$duplicateRegexp, $ex->getMessage()))
+          echo $ex->getMessage() . "<br/>";
+      }
+    }
+  }
+
+  public static function saveRecipeIngredients($recipe, $recipeId) {
+    foreach ($recipe->ingredients as $ingredient) {
+      $explodedUnit = explode(" ", $ingredient->amount);
 
       try {
-        $newRecipe->create();
-        $recipes[$newRecipe->name] = $newRecipe;
-
-        //save recipeIngredients into database
-        foreach ($recipe->ingredients as $ingredient) {
-          $explodedUnit = explode(" ", $ingredient->amount);
-          $newRecipeIngredient = new RecipeIngredient($newRecipe->id, $ingredients[$ingredient->name]->id, $explodedUnit[0], $units[$explodedUnit[1]]->id);
-
-          try {
-            $newRecipeIngredient->create();
-          } catch (Exception $ex) {
-            if (!preg_match($duplicateRegexp, $ex->getMessage()))
-              echo $ex->getMessage() . "<br/>";
-          }
-        }
-
-        $db->insert_id;
+        $newRecipeIngredient = new RecipeIngredient($recipeId, self::$ingredients[$ingredient->name]->id, $explodedUnit[0], self::$units[$explodedUnit[1]]->id);
+        $newRecipeIngredient->create();
       } catch (Exception $ex) {
-        if (!preg_match($duplicateRegexp, $ex->getMessage()))
+        if (!preg_match(self::$duplicateRegexp, $ex->getMessage()))
           echo $ex->getMessage() . "<br/>";
       }
     }
+  }
 
-    //save salesOfLastWeek into database
-    foreach ($data->salesOfLastWeek as $sale) {
-      if (!isset($recipes[$sale->name]))
+  public static function saveSalesOfLastWeek() {
+    foreach (self::$data->salesOfLastWeek as $sale) {
+      if (!isset(self::$recipes[$sale->name]))
         continue;
 
-      $recipeId = $recipes[$sale->name]->id;
-      $newSale = new Sale($recipeId, $sale->amount);
-
       try {
+        $recipeId = self::$recipes[$sale->name]->id;
+        $newSale = new Sale($recipeId, $sale->amount);
         $newSale->create();
       } catch (Exception $ex) {
-        if (!preg_match($duplicateRegexp, $ex->getMessage()))
+        if (!preg_match(self::$duplicateRegexp, $ex->getMessage()))
           echo $ex->getMessage() . "<br/>";
       }
     }
+  }
 
-    //save wholesalePrices into database
-    foreach ($data->wholesalePrices as $wholesalePrice) {
+  public static function saveWholeSalePrices() {
+    foreach (self::$data->wholesalePrices as $wholesalePrice) {
       $explodedUnit = explode(" ", $wholesalePrice->amount);
-      if (!isset($ingredients[$wholesalePrice->name]) || !isset($units[$explodedUnit[1]]))
+      if (!isset(self::$ingredients[$wholesalePrice->name]) || !isset(self::$units[$explodedUnit[1]]))
         continue;
 
-      $newWholesalePrice = new WholesalePrice($ingredients[$wholesalePrice->name]->id, $explodedUnit[0], $units[$explodedUnit[1]]->id, $wholesalePrice->price);
-
       try {
+        $newWholesalePrice = new WholesalePrice(self::$ingredients[$wholesalePrice->name]->id, $explodedUnit[0], self::$units[$explodedUnit[1]]->id, $wholesalePrice->price);
         $newWholesalePrice->create();
       } catch (Exception $ex) {
-        if (!preg_match($duplicateRegexp, $ex->getMessage()))
+        if (!preg_match(self::$duplicateRegexp, $ex->getMessage()))
           echo $ex->getMessage() . "<br/>";
       }
     }
