@@ -27,7 +27,7 @@ class StartingDataService {
     self::saveWholeSalePrices();
   }
 
-  public static function saveUnits() {
+  private static function saveUnits() {
     $unitsLocation = "units.json";
     $unitsFile = fopen($unitsLocation, "r") or die("Unable to open units file!");
     $unitsJson = json_decode(fread($unitsFile, filesize($unitsLocation)));
@@ -45,7 +45,7 @@ class StartingDataService {
     }
   }
 
-  public static function saveIngredients() {
+  private static function saveIngredients() {
     foreach (self::$data->inventory as $inventory) {
       $explodedAmount = explode(" ", $inventory->amount);
 
@@ -69,7 +69,7 @@ class StartingDataService {
     }
   }
 
-  public static function saveRecipes() {
+  private static function saveRecipes() {
     foreach (self::$data->recipes as $recipe) {
       try {
         $newRecipe = new Recipe($recipe->name, explode(" ", $recipe->price)[0], $recipe->lactoseFree, $recipe->glutenFree);
@@ -85,7 +85,7 @@ class StartingDataService {
     }
   }
 
-  public static function saveRecipeIngredients($recipe, $recipeId) {
+  private static function saveRecipeIngredients($recipe, $recipeId) {
     foreach ($recipe->ingredients as $ingredient) {
       $explodedUnit = explode(" ", $ingredient->amount);
 
@@ -99,7 +99,7 @@ class StartingDataService {
     }
   }
 
-  public static function saveSalesOfLastWeek() {
+  private static function saveSalesOfLastWeek() {
     foreach (self::$data->salesOfLastWeek as $sale) {
       if (!isset(self::$recipes[$sale->name]))
         continue;
@@ -115,7 +115,7 @@ class StartingDataService {
     }
   }
 
-  public static function saveWholeSalePrices() {
+  private static function saveWholeSalePrices() {
     foreach (self::$data->wholesalePrices as $wholesalePrice) {
       $explodedUnit = explode(" ", $wholesalePrice->amount);
       if (!isset(self::$ingredients[$wholesalePrice->name]) || !isset(self::$units[$explodedUnit[1]]))
