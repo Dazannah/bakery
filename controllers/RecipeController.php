@@ -8,7 +8,7 @@ class RecipeController {
   private IRecipeService $recipeService;
 
   public function __construct() {
-    $this->recipeService = new RecipeService(Database::getInstance(), new IngredientService(Database::getInstance()));
+    $this->recipeService = new RecipeService(Database::getInstance(), new IngredientService(Database::getInstance()), new WholesalePriceService(Database::getInstance()));
   }
 
   public function threeColumn() {
