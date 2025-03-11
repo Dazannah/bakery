@@ -8,11 +8,11 @@ require_once "./models/Sale.php";
 require_once "./models/WholesalePrice.php";
 
 class StartingDataService {
-  public static $duplicateRegexp = "/duplicate/i";
-  public static $data;
-  public static $units = [];
-  public static $ingredients = [];
-  public static $recipes = [];
+  private static $duplicateRegexp = "/duplicate/i";
+  private static $data;
+  private static $units = [];
+  private static $ingredients = [];
+  private static $recipes = [];
 
   public static function addProvidedData() {
     self::saveUnits();
