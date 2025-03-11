@@ -6,7 +6,9 @@ class InventoryController {
   private IInventoryService $inventoryService;
 
   public function __construct() {
-    $this->inventoryService = new InventoryService(new RecipeService(Database::getInstance(), new IngredientService(Database::getInstance())));
+    $this->inventoryService = new InventoryService(
+      new RecipeService(Database::getInstance(), new IngredientService(Database::getInstance()), new WholesalePriceService(Database::getInstance()))
+    );
   }
 
   public function getMaxProducableFromInventory() {
