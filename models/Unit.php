@@ -1,8 +1,8 @@
 <?php
 require_once "./interfaces/IModel.php";
+require_once "./models/BaseModel.php";
 
-
-class Unit implements IModel {
+class Unit extends BaseModel implements IModel {
   public int|null $id;
   public string $name;
 

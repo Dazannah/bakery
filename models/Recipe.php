@@ -1,7 +1,8 @@
 <?php
 require_once "./interfaces/IModel.php";
+require_once "./models/BaseModel.php";
 
-class Recipe implements IModel {
+class Recipe extends BaseModel implements IModel {
   public int|null $id;
   public string $name;
   public int $price;

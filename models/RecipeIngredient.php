@@ -1,6 +1,8 @@
  <?php
+  require_once "./interfaces/IModel.php";
+  require_once "./models/BaseModel.php";
 
-  class RecipeIngredient {
+  class RecipeIngredient extends BaseModel implements IModel {
     public int $recipeId;
     public int $ingredientId;
     public int $amount;
@@ -13,7 +15,7 @@
       $this->unitId = $unitId;
     }
 
-    public function getCreateSql() {
+    public function getCreateSql(): string {
       return "INSERT INTO RecipesIngredients(recipeId,ingredientId,amount,unitId) VALUES('$this->recipeId', '$this->ingredientId', '$this->amount', '$this->unitId')";
     }
   }
