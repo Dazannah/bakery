@@ -4,10 +4,12 @@ require_once "./interfaces/IIngredientService.php";
 class RecipeService implements IRecipeService {
   private mysqli $db;
   private IIngredientService $ingredientService;
+  private IWholesalePriceService $wholesalePriceService;
 
-  public function __construct(mysqli $db, IIngredientService $ingredientService) {
+  public function __construct(mysqli $db, IIngredientService $ingredientService, IWholesalePriceService $wholesalePriceService) {
     $this->db = $db;
     $this->ingredientService = $ingredientService;
+    $this->wholesalePriceService = $wholesalePriceService;
   }
 
   public function getFreeColumn(): array {
@@ -23,14 +25,14 @@ class RecipeService implements IRecipeService {
   }
 
   /** @return  RecipeDTO[] */
-  public function getRecipesByIds(array $ids): array {
+  public function getRecipesByField(string $field, array $ids): array {
     $idsString = "";
     foreach ($ids as $key => $id) {
-      $idsString .= "$id";
+      $idsString .= "'$id'";
       if ($key < count($ids) - 1)
         $idsString .= ",";
     }
-    $where = "WHERE id in ($idsString)";
+    $where = "WHERE $field in ($idsString)";
 
     return $this->getRecipesBase($where);
   }
@@ -53,5 +55,16 @@ class RecipeService implements IRecipeService {
     }
 
     return $recipes;
+  }
+
+  public function getPrepareCost(RecipeDTO $recipe): int {
+    $basePrices = $this->wholesalePriceService->getBasePrices();
+
+    $cost = 0;
+    foreach ($recipe->ingredients as $ingredient) {
+      $cost += $basePrices[$ingredient->name] * $ingredient->amount;
+    }
+
+    return $cost;
   }
 }
