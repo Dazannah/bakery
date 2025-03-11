@@ -59,6 +59,34 @@ fetch("/max-producable")
     maxProducable.innerHTML = generateTbody(data, "db");
   });
 
+fetch("/calculate-order-price", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    "Francia krémes": 300,
+    "Rákóczi túrós": 200,
+    Képviselőfánk: 300,
+    Isler: 100,
+    Tiramisu: 150
+  })
+})
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      console.log(response.statusText);
+    }
+  })
+  .then(data => {
+    const orderPriceSpan = document.getElementById("order-price");
+    const orderProfitSpan = document.getElementById("order-profit");
+
+    orderPriceSpan.innerText = data.orderPrice;
+    orderProfitSpan.innerText = data.orderProfit;
+  });
+
 function generateTbody(array, unit) {
   let resultHtml = "";
   array.forEach(food => {
