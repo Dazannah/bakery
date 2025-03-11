@@ -1,0 +1,3 @@
+{
+  "database": { "servername": "localhost", "username": "usrname", "password": "password", "database": "bakery", "port": "3306" }
+}
