@@ -14,10 +14,9 @@ class StartingDataService {
   private static $ingredients = [];
   private static $recipes = [];
 
-  public static function addProvidedData() {
+  public static function addProvidedData(string $dataLocation) {
     self::saveUnits();
 
-    $dataLocation = "data.json";
     $dataFile = fopen($dataLocation, "r") or die("Unable to open config file!");
     self::$data = json_decode(fread($dataFile, filesize($dataLocation)));
 
