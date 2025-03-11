@@ -8,7 +8,9 @@ require_once "./controllers/RecipeController.php";
 require_once "./controllers/InventoryController.php";
 require_once "./controllers/OrderController.php";
 
-StartingDataService::addProvidedData();
+const CONFIG_FILE_LOCATION = "./data.json";
+
+StartingDataService::addProvidedData(CONFIG_FILE_LOCATION);
 
 $router = Router::getInstance();
 
