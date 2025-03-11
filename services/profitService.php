@@ -31,11 +31,16 @@ class ProfitService implements IProfitService {
       array_push($recipeIds, $sale[0]);
     }
 
-    $recipes = $this->recipeService->getRecipesByIds($recipeIds);
+    $recipes = $this->recipeService->getRecipesByField("id", $recipeIds);
+
+    return $this->calculateProfit($recipes, $salesOfLastWeek, $lastweekIncome);
+  }
+
+  public function calculateProfit(array $recipes, array $sales, int $income): int {
     $basePrices = $this->wholesalePriceService->getBasePrices();
 
     $lastWeekIngredientsCost = 0;
-    foreach ($salesOfLastWeek as $sale) {
+    foreach ($sales as $sale) {
 
       $ingredientCost = 0;
       foreach ($recipes[$sale[0]]->ingredients as $ingredient) {
@@ -45,7 +50,7 @@ class ProfitService implements IProfitService {
       $lastWeekIngredientsCost += $ingredientCost * $sale[1];
     }
 
-    $result = $lastweekIncome - $lastWeekIngredientsCost;
+    $result = $income - $lastWeekIngredientsCost;
 
     return $result; // minusz a végeredmény ellenőrizni
   }
