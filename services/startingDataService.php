@@ -21,12 +21,10 @@ class StartingDataService {
     //save units into database
     foreach ($unitsJson as $unit) {
       $unit = new Unit($unit);
-      $sql = $unit->getCreateSql();
 
       try {
-        $db->query($sql);
+        $unit->create();
 
-        $unit->id = $db->insert_id;
         $units[$unit->name] = $unit;
       } catch (Exception $ex) {
         if (!preg_match($duplicateRegexp, $ex->getMessage()))
@@ -51,11 +49,9 @@ class StartingDataService {
       }
 
       $ingredient = new Ingredient($inventory->name, $explodedAmount[0], $units[$explodedAmount[1]]->id);
-      $sql = $ingredient->getCreateSql();
 
       try {
-        $db->query($sql);
-        $ingredient->id = $db->insert_id;
+        $ingredient->create();
 
         $ingredients[$ingredient->name] = $ingredient;
       } catch (Exception $ex) {
@@ -70,22 +66,18 @@ class StartingDataService {
     //save recipes into database
     foreach ($data->recipes as $recipe) {
       $newRecipe = new Recipe($recipe->name, explode(" ", $recipe->price)[0], $recipe->lactoseFree, $recipe->glutenFree);
-      $sql = $newRecipe->getCreateSql();
-
 
       try {
-        $db->query($sql);
-        $newRecipe->id = $db->insert_id;
+        $newRecipe->create();
         $recipes[$newRecipe->name] = $newRecipe;
 
         //save recipeIngredients into database
         foreach ($recipe->ingredients as $ingredient) {
           $explodedUnit = explode(" ", $ingredient->amount);
           $newRecipeIngredient = new RecipeIngredient($newRecipe->id, $ingredients[$ingredient->name]->id, $explodedUnit[0], $units[$explodedUnit[1]]->id);
-          $sql = $newRecipeIngredient->getCreateSql();
 
           try {
-            $db->query($sql);
+            $newRecipeIngredient->create();
           } catch (Exception $ex) {
             if (!preg_match($duplicateRegexp, $ex->getMessage()))
               echo $ex->getMessage() . "<br/>";
@@ -106,10 +98,9 @@ class StartingDataService {
 
       $recipeId = $recipes[$sale->name]->id;
       $newSale = new Sale($recipeId, $sale->amount);
-      $sql = $newSale->getCreateSql();
 
       try {
-        $db->query($sql);
+        $newSale->create();
       } catch (Exception $ex) {
         if (!preg_match($duplicateRegexp, $ex->getMessage()))
           echo $ex->getMessage() . "<br/>";
@@ -123,10 +114,9 @@ class StartingDataService {
         continue;
 
       $newWholesalePrice = new WholesalePrice($ingredients[$wholesalePrice->name]->id, $explodedUnit[0], $units[$explodedUnit[1]]->id, $wholesalePrice->price);
-      $sql = $newWholesalePrice->getCreateSql();
 
       try {
-        $db->query($sql);
+        $newWholesalePrice->create();
       } catch (Exception $ex) {
         if (!preg_match($duplicateRegexp, $ex->getMessage()))
           echo $ex->getMessage() . "<br/>";
