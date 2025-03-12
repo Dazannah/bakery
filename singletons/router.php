@@ -39,8 +39,9 @@ class Router {
       exit();
     }
 
-    $indexHtml = fopen("index.html", "r") or die("Unable to open file!");
-    echo fread($indexHtml, filesize("index.html"));
+    $indexHtmlLocation = "public/index.html";
+    $indexHtml = fopen($indexHtmlLocation, "r") or die("Unable to open file!");
+    echo fread($indexHtml, filesize($indexHtmlLocation));
     fclose($indexHtml);
 
     exit();
